@@ -7,6 +7,12 @@ def getColor(colors):
     colors.updateColor()
     return Color(colors.getRed(), colors.getGreen(), colors.getBlue())
 
+def blinkAndFade(strip, colors, duration_s=60, min_wait_ms=150, max_wait_ms=1000):
+    # Set initial pixel state
+    status = ['On','Off','Fade'];
+    state = [random.choice(status) for x in range(strip.numPixels())]
+    countdown = [random.randint(min_wait_ms,max_wait_ms) for x in range(strip.numPixels())]
+    
 def blinker(strip, colors, duration_s=60, min_wait_ms=150, max_wait_ms=1000):
     # Set initial pixel state
     countdown = [random.randint(min_wait_ms,max_wait_ms) for x in range(strip.numPixels())]
