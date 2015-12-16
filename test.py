@@ -9,9 +9,29 @@ def getColor(colors):
 
 def blinkAndFade(strip, colors, duration_s=60, min_wait_ms=150, max_wait_ms=1000):
     # Set initial pixel state
-    status = ['On','Off','Fade'];
-    state = [random.choice(status) for x in range(strip.numPixels())]
+    state = [random.choice(['On','Off']) for x in range(strip.numPixels())]
     countdown = [random.randint(min_wait_ms,max_wait_ms) for x in range(strip.numPixels())]
+
+    for i in range(0, duration_s*1000, min_wait_ms):
+        for j in range(strip.numPixels()):
+            if state[j] == 'Fade':
+            else:
+                # Decrement pixel countdown values
+                countdown[j] = max(0, countdown[j] - min_wait_ms);
+
+                if countdown[j] == 0:
+                    # Update state of pixels which have timed out
+                    state[j] = random.choice(states)
+                    countdown[j] = random.randint(min_wait_ms, max_wait_ms)
+
+                    # Update pixel color
+                    if state[j] == 'Off':
+                        strip.setPixelColor(j, Color(0, 0, 0))    # off pixel
+                    else:
+                        strip.setPixelColor(j, getColor(colors))  # color pixel
+
+        strip.show()
+        time.sleep(min_wait_ms/1000.0)                    
     
 def blinker(strip, colors, duration_s=60, min_wait_ms=150, max_wait_ms=1000):
     # Set initial pixel state
