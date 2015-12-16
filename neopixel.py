@@ -2,9 +2,19 @@
 # Author: Tony DiCola (tony@tonydicola.com), Jeremy Garff (jer@jers.net)
 from graphics import *
 
-def Color(red, green, blue):
+def GraphWinColor(color):
+    red   = (color >> 16) & 0xFF
+    green = (color >> 8) & 0xFF
+    blue  = color & 0xFF
+
     return "#%02x%02x%02x" % (red,green,blue)
 
+def Color(red, green, blue):
+	"""Convert the provided red, green, blue color to a 24-bit color value.
+	Each color component should be a value 0-255 where 0 is the lowest intensity
+	and 255 is the highest intensity.
+	"""
+	return (red << 16) | (green << 8) | blue
 
 class Adafruit_NeoPixel(object):
     def __init__(self, num, pin, freq_hz=800000, dma=5, invert=False, brightness=255, channel=0):
@@ -16,6 +26,7 @@ class Adafruit_NeoPixel(object):
 	specifying if the signal line should be inverted (default False), and
 	channel, the PWM channel to use (defaults to 0).
 	"""
+        self._colors = [0 for x in range(num)]
         self._num = num
 
     def begin(self):
@@ -37,7 +48,8 @@ class Adafruit_NeoPixel(object):
     def setPixelColor(self, n, color):
         """Set LED at position n to the provided 24-bit color value (in RGB order).
 	"""
-	self._pixels[n].setFill(color)
+	self._pixels[n].setFill(GraphWinColor(color))
+        self._colors[n] = color
 
     def setPixelColorRGB(self, n, red, green, blue):
 	"""Set LED at position n to the provided red, green, and blue color.
@@ -63,4 +75,4 @@ class Adafruit_NeoPixel(object):
 
     def getPixelColor(self, n):
 	"""Get the 24-bit RGB color value for the LED at position n."""
-	return self._led_data[n]
+        return self._colors[n]
