@@ -12,11 +12,11 @@ def blinkAndFade(strip, colors, duration_s=60, min_wait_ms=150, max_wait_ms=2000
     state = [random.choice(['On','Off']) for x in range(strip.numPixels())]
     countdown = [random.randint(min_wait_ms,max_wait_ms) for x in range(strip.numPixels())]
 
-    for i in range(0, duration_s*1000, min_wait_ms):
+    for i in range(0, duration_s*1000, 50):
         for j in range(strip.numPixels()):
             if state[j] == 'On' or state[j] == 'Off':
                 # Decrement pixel countdown value if it's on/off
-                countdown[j] = max(0, countdown[j] - min_wait_ms)
+                countdown[j] = max(0, countdown[j] - 50)
 
                 if countdown[j] == 0:
                     if state[j] == 'On':
@@ -34,10 +34,10 @@ def blinkAndFade(strip, colors, duration_s=60, min_wait_ms=150, max_wait_ms=2000
                 # Get current pixel color
                 color = strip.getPixelColor(j)
 
-                # Reduce all color intensities by 16
-                red   = max(0, ((color >> 16) & 0xFF) - 16)
-                green = max(0, ((color >> 8) & 0xFF) - 16)
-                blue  = max(0, (color & 0xFF) - 16)
+                # Reduce all color intensities by 4
+                red   = max(0, ((color >> 16) & 0xFF) - 4)
+                green = max(0, ((color >> 8) & 0xFF) - 4)
+                blue  = max(0, (color & 0xFF) - 4)
 
                 # Set new pixel color
                 newColor = Color(red, green, blue)
@@ -45,11 +45,11 @@ def blinkAndFade(strip, colors, duration_s=60, min_wait_ms=150, max_wait_ms=2000
 
                 if newColor == 0:
                     # Pixel has faded to 0. Transition to 'Off' state.
-                    countdown[j] = random.randint(min_wait_ms, max_wait_ms)
+                    countdown[j] = random.randint(min_wait_ms/2, max_wait_ms/2)
                     state[j] = 'Off'                    
 
         strip.show()
-        time.sleep(min_wait_ms/1000.0)                    
+        time.sleep(50/1000.0)                    
     
 def blinker(strip, colors, duration_s=60, min_wait_ms=150, max_wait_ms=1000):
     # Set initial pixel state
@@ -89,14 +89,13 @@ def main():
     strip = Adafruit_NeoPixel(40, 0)
     strip.begin()
 
-    #blinker(strip, colors)
-    blinkAndFade(strip, colors)
+    while True:
+        #blinker(strip, colors)
+        blinkAndFade(strip, colors)
 
-    #colorWipe(strip, Color(255, 0, 0))  # Red wipe
-    #colorWipe(strip, Color(0, 255, 0))  # Green wipe    
-    #colorWipe(strip, Color(0, 0, 255))  # Blue wipe    
-
-    #time.sleep(60) # delays for 60 seconds
+        #colorWipe(strip, Color(255, 0, 0))  # Red wipe
+        #colorWipe(strip, Color(0, 255, 0))  # Green wipe    
+        #colorWipe(strip, Color(0, 0, 255))  # Blue wipe    
     
 if __name__ == "__main__":
     main()
