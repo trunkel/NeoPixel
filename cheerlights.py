@@ -26,7 +26,7 @@ class CheerLights(object):
         current = datetime.now()
         diff = current - self._lastUpdate                   # Get time since last update
 
-        if diff.seconds > 10:                               # Only update every 10 seconds
+        if diff.seconds > 60:                               # Only update every 60 seconds
             self._lastUpdate = current
 
             cheerlights = urllib.urlopen(cheerlightsUrl)    # Open cheerlights file via URL
@@ -46,3 +46,6 @@ class CheerLights(object):
 
     def getBlue(self):
         return (self._current & 0xFF)
+
+    def getColor(self):
+        return self._current

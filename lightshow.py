@@ -3,11 +3,29 @@ from neopixel import *
 import random
 import time
 
-def getColor(colors):
-    colors.updateColor()
-    return Color(colors.getRed(), colors.getGreen(), colors.getBlue())
 
-def blinkAndFade(strip, colors, duration_s=60, min_wait_ms=150, max_wait_ms=2000):
+# LED strip configuration:
+LED_COUNT   = 150     # Number of LED pixels.
+LED_PIN     = 18      # GPIO pin connected to the pixels (must support PWM!).
+LED_FREQ_HZ = 800000  # LED signal frequency in hertz (usually 800khz)
+LED_DMA     = 5       # DMA channel to use for generating signal (try 5)
+LED_INVERT  = False   # True to invert the signal (when using NPN transistor level shift)
+
+
+def getCheerlight(colors):
+    colors.updateColor()
+    return colors.getColor()
+
+def getRandomColor():
+    return Color(random.randint(0,255),random.randint(0,255),random.randint(0,255))
+
+def clear(strip):
+    """Clear all pixels"""
+    for i in range(strip.numPixels()):
+        strip.setPixelColor(i, Color(0,0,0))
+    strip.show()
+
+def blinkAndFade(strip, get_color, duration_s=60, min_wait_ms=50, max_wait_ms=500):
     # Set initial pixel state
     state = [random.choice(['On','Off']) for x in range(strip.numPixels())]
     countdown = [random.randint(min_wait_ms,max_wait_ms) for x in range(strip.numPixels())]
@@ -28,16 +46,16 @@ def blinkAndFade(strip, colors, duration_s=60, min_wait_ms=150, max_wait_ms=2000
                         state[j] = 'On'
 
                         # Set pixel color
-                        strip.setPixelColor(j, getColor(colors))
+                        strip.setPixelColor(j, get_color())
 
             if state[j] == 'Fade':
                 # Get current pixel color
                 color = strip.getPixelColor(j)
 
-                # Reduce all color intensities by 4
-                red   = max(0, ((color >> 16) & 0xFF) - 4)
-                green = max(0, ((color >> 8) & 0xFF) - 4)
-                blue  = max(0, (color & 0xFF) - 4)
+                # Reduce all color intensities by 8
+                red   = max(0, ((color >> 16) & 0xFF) - 8)
+                green = max(0, ((color >> 8) & 0xFF) - 8)
+                blue  = max(0, (color & 0xFF) - 8)
 
                 # Set new pixel color
                 newColor = Color(red, green, blue)
@@ -45,57 +63,27 @@ def blinkAndFade(strip, colors, duration_s=60, min_wait_ms=150, max_wait_ms=2000
 
                 if newColor == 0:
                     # Pixel has faded to 0. Transition to 'Off' state.
-                    countdown[j] = random.randint(min_wait_ms/2, max_wait_ms/2)
+                    countdown[j] = random.randint(min_wait_ms, max_wait_ms)
                     state[j] = 'Off'                    
 
         strip.show()
         time.sleep(50/1000.0)                    
     
-def blinker(strip, colors, duration_s=60, min_wait_ms=150, max_wait_ms=1000):
-    # Set initial pixel state
-    countdown = [random.randint(min_wait_ms,max_wait_ms) for x in range(strip.numPixels())]
-    state = [random.randint(0,3) for x in range(strip.numPixels())]
-
-    for i in range(0, duration_s*1000, min_wait_ms):
-        for j in range(strip.numPixels()):
-            # Decrement pixel countdown values
-            countdown[j] = max(0, countdown[j] - min_wait_ms);
-
-            if countdown[j] == 0:
-                # Update state of pixels which have timed out
-                state[j] = random.randint(0,3)
-                countdown[j] = random.randint(min_wait_ms, max_wait_ms)
-
-                # Update pixel color
-                if state[j] == 0:
-                    strip.setPixelColor(j, Color(0, 0, 0))    # off pixel
-                else:
-                    strip.setPixelColor(j, getColor(colors))  # color pixel
-
-        strip.show()
-        time.sleep(min_wait_ms/1000.0)
-
-def colorWipe(strip, color, wait_ms=50):
-    """Wipe color across display a pixel at a time."""
-    for i in range(strip.numPixels()):
-        strip.setPixelColor(i, color)
-        strip.show()
-        time.sleep(wait_ms/1000.0)
-                
 def main():
     colors = CheerLights()
     colors.updateColor()
 
-    strip = Adafruit_NeoPixel(40, 0)
+    strip = Adafruit_NeoPixel(LED_COUNT, LED_PIN, LED_FREQ_HZ, LED_DMA, LED_INVERT)
     strip.begin()
 
-    while True:
-        #blinker(strip, colors)
-        blinkAndFade(strip, colors)
+    print 'Press Ctrl-C to quit.'
+    try:
+        while True:
+            blinkAndFade(strip, lambda: getRandomColor())
+            blinkAndFade(strip, lambda: getCheerlight(colors))
 
-        #colorWipe(strip, Color(255, 0, 0))  # Red wipe
-        #colorWipe(strip, Color(0, 255, 0))  # Green wipe    
-        #colorWipe(strip, Color(0, 0, 255))  # Blue wipe    
+    except KeyboardInterrupt:
+        clear(strip)
     
 if __name__ == "__main__":
     main()
